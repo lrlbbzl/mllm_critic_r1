@@ -1,0 +1,14 @@
+{"time":"2025-02-21T16:07:26.749488986+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/tiger/R1-Multimodal-Journey/local_scripts/wandb/offline-run-20250221_160726-xgfzomse/logs/debug-core.log"}
+{"time":"2025-02-21T16:07:26.958839114+08:00","level":"INFO","msg":"created new stream","id":"xgfzomse"}
+{"time":"2025-02-21T16:07:26.958881242+08:00","level":"INFO","msg":"stream: started","id":"xgfzomse"}
+{"time":"2025-02-21T16:07:26.958903516+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"xgfzomse"}
+{"time":"2025-02-21T16:07:26.958923554+08:00","level":"INFO","msg":"sender: started","stream_id":"xgfzomse"}
+{"time":"2025-02-21T16:07:26.958951666+08:00","level":"INFO","msg":"handler: started","stream_id":"xgfzomse"}
+{"time":"2025-02-21T16:07:26.964400137+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-02-21T16:07:28.240724977+08:00","level":"INFO","msg":"stream: closing","id":"xgfzomse"}
+{"time":"2025-02-21T16:07:28.240762714+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-02-21T16:07:32.927603035+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-02-21T16:07:32.927702044+08:00","level":"INFO","msg":"handler: closed","stream_id":"xgfzomse"}
+{"time":"2025-02-21T16:07:32.927715439+08:00","level":"INFO","msg":"sender: closed","stream_id":"xgfzomse"}
+{"time":"2025-02-21T16:07:32.927711865+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"xgfzomse"}
+{"time":"2025-02-21T16:07:32.927783308+08:00","level":"INFO","msg":"stream: closed","id":"xgfzomse"}

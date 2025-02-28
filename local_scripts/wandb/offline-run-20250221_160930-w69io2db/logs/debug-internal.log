@@ -1,0 +1,14 @@
+{"time":"2025-02-21T16:09:30.541971073+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/tiger/R1-Multimodal-Journey/local_scripts/wandb/offline-run-20250221_160930-w69io2db/logs/debug-core.log"}
+{"time":"2025-02-21T16:09:30.950962644+08:00","level":"INFO","msg":"created new stream","id":"w69io2db"}
+{"time":"2025-02-21T16:09:30.951000898+08:00","level":"INFO","msg":"stream: started","id":"w69io2db"}
+{"time":"2025-02-21T16:09:30.951024071+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"w69io2db"}
+{"time":"2025-02-21T16:09:30.951036768+08:00","level":"INFO","msg":"handler: started","stream_id":"w69io2db"}
+{"time":"2025-02-21T16:09:30.95106489+08:00","level":"INFO","msg":"sender: started","stream_id":"w69io2db"}
+{"time":"2025-02-21T16:09:30.956486177+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-02-21T16:09:31.919947756+08:00","level":"INFO","msg":"stream: closing","id":"w69io2db"}
+{"time":"2025-02-21T16:09:31.919985861+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-02-21T16:09:35.905377452+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-02-21T16:09:35.905436512+08:00","level":"INFO","msg":"handler: closed","stream_id":"w69io2db"}
+{"time":"2025-02-21T16:09:35.905444108+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"w69io2db"}
+{"time":"2025-02-21T16:09:35.905456136+08:00","level":"INFO","msg":"sender: closed","stream_id":"w69io2db"}
+{"time":"2025-02-21T16:09:35.905493711+08:00","level":"INFO","msg":"stream: closed","id":"w69io2db"}

@@ -1,0 +1,42 @@
+{"time":"2025-02-21T16:23:10.132586398+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpk_euhhz1/port-156234.txt","pid":156234,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.133303437+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156234}
+{"time":"2025-02-21T16:23:10.133292034+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":44403,"Zone":""}}
+{"time":"2025-02-21T16:23:10.174950587+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpe8zymano/port-156236.txt","pid":156236,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.176154705+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156236}
+{"time":"2025-02-21T16:23:10.176134401+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":34781,"Zone":""}}
+{"time":"2025-02-21T16:23:10.202979945+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpfine_f0c/port-156235.txt","pid":156235,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.203561225+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156235}
+{"time":"2025-02-21T16:23:10.20355801+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":35485,"Zone":""}}
+{"time":"2025-02-21T16:23:10.244809914+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmposvwwyw1/port-156233.txt","pid":156233,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.24544314+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156233}
+{"time":"2025-02-21T16:23:10.24543334+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":47993,"Zone":""}}
+{"time":"2025-02-21T16:23:10.299043459+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpr978i3yf/port-156231.txt","pid":156231,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.299640394+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156231}
+{"time":"2025-02-21T16:23:10.299635341+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":38453,"Zone":""}}
+{"time":"2025-02-21T16:23:10.313491025+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpri5ccje_/port-156232.txt","pid":156232,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.314050775+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156232}
+{"time":"2025-02-21T16:23:10.31403756+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":43845,"Zone":""}}
+{"time":"2025-02-21T16:23:10.31793146+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:55074"}
+{"time":"2025-02-21T16:23:10.325549714+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"852fkojm","id":"127.0.0.1:55074"}
+{"time":"2025-02-21T16:23:10.361770712+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:53650"}
+{"time":"2025-02-21T16:23:10.366580999+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"dxnftcce","id":"127.0.0.1:53650"}
+{"time":"2025-02-21T16:23:10.388860022+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:54188"}
+{"time":"2025-02-21T16:23:10.39370279+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"2hu6whj0","id":"127.0.0.1:54188"}
+{"time":"2025-02-21T16:23:10.432294411+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:37954"}
+{"time":"2025-02-21T16:23:10.437220692+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"e6wupu9d","id":"127.0.0.1:37954"}
+{"time":"2025-02-21T16:23:10.48636472+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:46286"}
+{"time":"2025-02-21T16:23:10.491231284+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"15ev8iuw","id":"127.0.0.1:46286"}
+{"time":"2025-02-21T16:23:10.494820373+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"852fkojm","id":"127.0.0.1:55074"}
+{"time":"2025-02-21T16:23:10.500995174+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:63028"}
+{"time":"2025-02-21T16:23:10.506097427+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"b0eyqosh","id":"127.0.0.1:63028"}
+{"time":"2025-02-21T16:23:10.541132922+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"dxnftcce","id":"127.0.0.1:53650"}
+{"time":"2025-02-21T16:23:10.578033396+08:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpip109te3/port-156230.txt","pid":156230,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false}
+{"time":"2025-02-21T16:23:10.578826887+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"2hu6whj0","id":"127.0.0.1:54188"}
+{"time":"2025-02-21T16:23:10.578949858+08:00","level":"INFO","msg":"Will exit if parent process dies.","ppid":156230}
+{"time":"2025-02-21T16:23:10.578915347+08:00","level":"INFO","msg":"server is running","addr":{"IP":"127.0.0.1","Port":39337,"Zone":""}}
+{"time":"2025-02-21T16:23:10.613794898+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"e6wupu9d","id":"127.0.0.1:37954"}
+{"time":"2025-02-21T16:23:10.763255661+08:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"127.0.0.1:62230"}
+{"time":"2025-02-21T16:23:10.767470802+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"15ev8iuw","id":"127.0.0.1:46286"}
+{"time":"2025-02-21T16:23:10.768591264+08:00","level":"INFO","msg":"handleInformInit: received","streamId":"8dfyu45a","id":"127.0.0.1:62230"}
+{"time":"2025-02-21T16:23:10.803977083+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"b0eyqosh","id":"127.0.0.1:63028"}
+{"time":"2025-02-21T16:23:11.342189798+08:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"8dfyu45a","id":"127.0.0.1:62230"}

@@ -1,0 +1,14 @@
+{"time":"2025-02-21T16:07:26.806964342+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.7","symlink path":"/opt/tiger/R1-Multimodal-Journey/local_scripts/wandb/offline-run-20250221_160726-ld123oiu/logs/debug-core.log"}
+{"time":"2025-02-21T16:07:27.016067985+08:00","level":"INFO","msg":"created new stream","id":"ld123oiu"}
+{"time":"2025-02-21T16:07:27.016105091+08:00","level":"INFO","msg":"stream: started","id":"ld123oiu"}
+{"time":"2025-02-21T16:07:27.016131793+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"ld123oiu"}
+{"time":"2025-02-21T16:07:27.016164955+08:00","level":"INFO","msg":"sender: started","stream_id":"ld123oiu"}
+{"time":"2025-02-21T16:07:27.0161434+08:00","level":"INFO","msg":"handler: started","stream_id":"ld123oiu"}
+{"time":"2025-02-21T16:07:27.021856575+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-02-21T16:07:28.306067515+08:00","level":"INFO","msg":"stream: closing","id":"ld123oiu"}
+{"time":"2025-02-21T16:07:28.306098537+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-02-21T16:07:32.968442204+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-02-21T16:07:32.968528428+08:00","level":"INFO","msg":"handler: closed","stream_id":"ld123oiu"}
+{"time":"2025-02-21T16:07:32.968538039+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ld123oiu"}
+{"time":"2025-02-21T16:07:32.96858008+08:00","level":"INFO","msg":"sender: closed","stream_id":"ld123oiu"}
+{"time":"2025-02-21T16:07:32.968599579+08:00","level":"INFO","msg":"stream: closed","id":"ld123oiu"}
