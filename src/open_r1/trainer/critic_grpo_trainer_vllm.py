@@ -609,6 +609,10 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
             add_special_tokens=False,
         )
         prompt_inputs_critic = super()._prepare_inputs(prompt_inputs_critic)
+        if self.max_prompt_length is not None:
+            prompt_inputs_critic["input_ids"] = prompt_inputs_critic["input_ids"][:, -self.max_prompt_length:]
+            prompt_inputs_critic["attention_mask"] = prompt_inputs_critic["attention_mask"][:, -self.max_prompt_length:]
+
         all_critic_inputs_vllm = gather_object(critic_inputs_vllm)
         if self.accelerator.is_main_process:
             outputs = self.llm.generate(all_critic_inputs_vllm, sampling_params=self.sampling_params, use_tqdm=False)
@@ -648,6 +652,7 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
         batched_inputs2 = prompt_inputs_critic.copy()
         batched_inputs2['input_ids'] = critic_prompt_completion_ids
         batched_inputs2['attention_mask'] = critic_attention_mask
+
         ### end batched input2
         critic_per_token_logps = get_per_token_logps(model, **batched_inputs2)
 
@@ -762,7 +767,6 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
 
         mean_critic_kl = ((critic_per_token_kl * critic_completion_mask).sum(dim=1) / critic_completion_mask.sum(dim=1)).mean()
         self._metrics['critic_kl'].append(self.accelerator.gather_for_metrics(mean_critic_kl).mean().item())
-        import pdb; pdb.set_trace()
         return loss
 
     def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
