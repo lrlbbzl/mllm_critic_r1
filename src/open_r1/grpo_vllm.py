@@ -131,6 +131,8 @@ def critic_accuracy_reward(completions, critic_completions, solution, process, *
             if (float(if_match) > 0 and single_critic.lower() == 'true') or \
                 (float(if_match) <= 0 and single_critic.lower() == 'false'):
                 reward = 1.0
+            if process == 1:
+                print('\nanswer: {}\nsol: {}\nground_truth: {}\nstudent_answer: {}\nsingle critic: {}\n'.format(answer, parser(sol), ground_truth, student_answer, single_critic))
         except Exception:
             pass  # Continue to next verification method if this fails
         rewards.append(reward)
@@ -153,10 +155,12 @@ def format_reward(completions, **kwargs):
     matches = [re.match(pattern, content) for content in completion_contents]
     return [1.0 if match else 0.0 for match in matches]
 
-def critic_format_reward(critic_completions, **kwargs):
+def critic_format_reward(critic_completions, process, **kwargs):
     """Reward function that checks if the completion has a specific format."""
     pattern = r"^<think>\s*.*?\s*</think>\s*<judge>\s*.*?\s*</judge>$"
     matches = [re.match(pattern, content) for content in critic_completions]
+    if process == 1:
+        print('\n{}\n\n{}\n\n{}\n'.format(matches, critic_completions[0], critic_completions[1]))
     return [1.0 if match else 0.0 for match in matches]
 
 
@@ -219,16 +223,15 @@ def main(script_args, training_args, model_args):
         dataset = dataset.remove_columns("messages")
 
     if "Qwen" in model_args.model_name_or_path or "Aria" in model_args.model_name_or_path:
-        # trainer_cls = Qwen2VLCriticGRPOTrainer
-        trainer_cls = Qwen2VLGRPOTrainer
+        trainer_cls = Qwen2VLCriticGRPOTrainer
+        # trainer_cls = Qwen2VLGRPOTrainer
     else:
         trainer_cls = GRPOTrainer
-
     # Initialize the GRPO trainer
     trainer = trainer_cls(
         model=model_args.model_name_or_path,
         reward_funcs=reward_funcs,
-        # critic_reward_funcs=critic_reward_funcs,
+        critic_reward_funcs=critic_reward_funcs,
         args=training_args,
         train_dataset=dataset[script_args.dataset_train_split],
         eval_dataset=dataset[script_args.dataset_test_split] if training_args.eval_strategy != "no" else None,
