@@ -82,11 +82,11 @@ def accuracy_reward(completions, solution, **kwargs):
         if reward == 0.0:
             try:
                 # Extract answer from solution if it has think/answer tags
-                sol_match = re.search(r'<answer>(.*?)</answer>', sol)
+                sol_match = re.search(r'<answer>(.*?)</answer>', sol, re.DOTALL)
                 ground_truth = sol_match.group(1).strip() if sol_match else sol.strip()
 
                 # Extract answer from content if it has think/answer tags
-                content_match = re.search(r'<answer>(.*?)</answer>', content)
+                content_match = re.search(r'<answer>(.*?)</answer>', content, re.DOTALL)
                 student_answer = content_match.group(1).strip() if content_match else content.strip()
 
                 # Compare the extracted answers
@@ -120,19 +120,17 @@ def critic_accuracy_reward(completions, critic_completions, solution, process, *
             answer = parse(content)
             if_match = verify(answer, parse(sol))
             if float(if_match) <= 0:
-                sol_match = re.search(r'<answer>(.*?)</answer>', sol)
+                sol_match = re.search(r'<answer>(.*?)</answer>', sol, re.DOTALL)
                 ground_truth = sol_match.group(1).strip() if sol_match else sol.strip()
-                content_match = re.search(r'<answer>(.*?)</answer>', content)
+                content_match = re.search(r'<answer>(.*?)</answer>', content, re.DOTALL)
                 student_answer = content_match.group(1).strip() if content_match else content.strip()
                 if student_answer == ground_truth:
                     if_match = 1.0
-            single_critic = re.search(r'<judge>(.*?)</judge>', critic)
+            single_critic = re.search(r'<judge>(.*?)</judge>', critic, re.DOTALL)
             single_critic = single_critic.group(1).strip() if single_critic else critic.strip()
             if (float(if_match) > 0 and single_critic.lower() == 'true') or \
                 (float(if_match) <= 0 and single_critic.lower() == 'false'):
                 reward = 1.0
-            if process == 1:
-                print('\nanswer: {}\nsol: {}\nground_truth: {}\nstudent_answer: {}\nsingle critic: {}\n'.format(answer, parser(sol), ground_truth, student_answer, single_critic))
         except Exception:
             pass  # Continue to next verification method if this fails
         rewards.append(reward)
@@ -152,15 +150,13 @@ def format_reward(completions, **kwargs):
     """Reward function that checks if the completion has a specific format."""
     pattern = r"^<think>\s*.*?\s*</think>\s*<answer>\s*.*?\s*</answer>$"
     completion_contents = [completion[0]["content"] for completion in completions]
-    matches = [re.match(pattern, content) for content in completion_contents]
+    matches = [re.match(pattern, content, re.DOTALL) for content in completion_contents]
     return [1.0 if match else 0.0 for match in matches]
 
 def critic_format_reward(critic_completions, process, **kwargs):
     """Reward function that checks if the completion has a specific format."""
     pattern = r"^<think>\s*.*?\s*</think>\s*<judge>\s*.*?\s*</judge>$"
-    matches = [re.match(pattern, content) for content in critic_completions]
-    if process == 1:
-        print('\n{}\n\n{}\n\n{}\n'.format(matches, critic_completions[0], critic_completions[1]))
+    matches = [re.match(pattern, content, re.DOTALL) for content in critic_completions]
     return [1.0 if match else 0.0 for match in matches]
 
 
