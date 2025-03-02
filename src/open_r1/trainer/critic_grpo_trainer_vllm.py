@@ -381,7 +381,7 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
             vllm_device = "auto"
             if vllm_device == "auto":
                 # vllm_device = f"cuda:{self.accelerator.num_processes - 1}"  # take the next GPU idx
-                vllm_device = "cuda:7"
+                vllm_device = "cuda:3"
             # Check that the requested device is available
             if vllm_device.split(":")[0] == "cuda" and int(vllm_device.split(":")[1]) >= torch.cuda.device_count():
                 raise ValueError(
@@ -529,21 +529,17 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
         completion_ids = completion_ids[process_slice]
         # Pad the completions, and concatenate them with the prompts
         completion_ids = [torch.tensor(ids, device=device) for ids in completion_ids]
+            
         completion_ids = pad(completion_ids, padding_value=self.processing_class.pad_token_id)
         prompt_completion_ids = torch.cat([batched_inputs["input_ids"], completion_ids], dim=1)
         # Mask everything after the first EOS token
         is_eos = completion_ids == self.processing_class.eos_token_id
         eos_idx = torch.full((is_eos.size(0),), is_eos.size(1), dtype=torch.long, device=device)
         eos_idx[is_eos.any(dim=1)] = is_eos.int().argmax(dim=1)[is_eos.any(dim=1)]
-        # if self.accelerator.process_index == 1:
-        #     import pickle; 
-        #     pickle.dump(completion_ids, open('/opt/tiger/MLLM/completion_ids.pkl', 'wb'))
-        #     print('\npre: {}\n{}\n'.format(is_eos.int().argmax(dim=1)[is_eos.any(dim=1)], completion_ids))
         sequence_indices = torch.arange(is_eos.size(1), device=device).expand(is_eos.size(0), -1)
         completion_mask = (sequence_indices <= eos_idx.unsqueeze(1)).int()
 
         attention_mask = torch.cat([batched_inputs["attention_mask"], completion_mask], dim=1)
-
         def get_per_token_logps(model, **inputs):
             logits = model(**inputs).logits  # (B, L, V)
             logits = logits[:, :-1, :]  # (B, L-1, V), exclude the last logit: it corresponds to the next token pred
@@ -565,10 +561,8 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
         batched_inputs1["attention_mask"] = attention_mask
         per_token_logps = get_per_token_logps(model, **batched_inputs1)
         # Get rid of the prompt (-1 because of the shift done in get_per_token_logps)
-
         prompt_length = batched_inputs["input_ids"].size(1)
         per_token_logps = per_token_logps[:, prompt_length - 1:]
-
         with torch.inference_mode():
             if self.ref_model is not None:
                 ref_per_token_logps = get_per_token_logps(self.ref_model, **batched_inputs1)
@@ -585,7 +579,8 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
         ## Start critic
         ## TODO critic code
         critic_inputs_vllm = []
-        critic_prompt_inputs = []
+        critic_inputs_list = []
+        images_list = []
         for j, messages in enumerate(prompts):
             initial_user_prompt = messages[1]['content'][1]['text']
             image_data, _ = process_vision_info(messages)
@@ -594,23 +589,8 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
                 critic_input = deepcopy(inputs[j])
                 critic_input['prompt'][1]['content'][1]['text'] = critic_text
                 
-                critic_prompt_text = [maybe_apply_chat_template(critic_input, self.processing_class)['prompt']]
-                # if self.accelerator.process_index == 1 and i == 0:
-                #     print('\ncritic_inputs:\n{}\n'.format(critic_input))
-                #     print('\ncritic_text:\n{}\n'.format(critic_prompt_text))
-                images = [critic_input['image']]
-                critic_prompt_input = self.processing_class(
-                    text=critic_prompt_text,
-                    images=images,
-                    return_tensors="pt",
-                    padding=True,
-                    add_special_tokens=False,
-                    padding_side="left",
-                )
-                critic_prompt_input = super()._prepare_input(critic_prompt_input)
-                # if self.accelerator.process_index == 1 and i == 0:
-                #     print('\ncritic_input_ids:\n{}\n'.format(critic_prompt_input))
-                critic_prompt_inputs.append(critic_prompt_input)
+                critic_inputs_list.append(maybe_apply_chat_template(critic_input, self.processing_class)['prompt'])
+                images_list.append(critic_input['image'])
                 new_messages = deepcopy(messages)
                 new_messages[1]['content'][1]['text'] = critic_text
                 prompt = self.processing_class.apply_chat_template(new_messages, tokenize=False, add_generation_prompt=True)
@@ -620,7 +600,15 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
                         "image": image_data
                     },
                 })
-
+        prompt_inputs_critic = self.processing_class(
+            text=critic_inputs_list,
+            images=images_list,
+            return_tensors="pt",
+            padding=True,
+            padding_side="left",
+            add_special_tokens=False,
+        )
+        prompt_inputs_critic = super()._prepare_inputs(prompt_inputs_critic)
         all_critic_inputs_vllm = gather_object(critic_inputs_vllm)
         if self.accelerator.is_main_process:
             outputs = self.llm.generate(all_critic_inputs_vllm, sampling_params=self.sampling_params, use_tqdm=False)
@@ -641,26 +629,41 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
         critic_completion_ids = pad(critic_completion_ids_unpad, padding_value=self.processing_class.pad_token_id)
 
         critic_completions = self.processing_class.batch_decode(critic_completion_ids, skip_special_tokens=True)
-        concat_inputs = []
-        for i, c in enumerate(critic_prompt_inputs):
-            concat_inputs.append(torch.tensor(torch.cat([c['input_ids'], critic_completion_ids_unpad[i].unsqueeze(0)], dim=1).squeeze(0), device=device))
-        batched_inputs2 = {}
-        for k, v in batched_inputs.items():
-            if k not in ['input_ids', 'attention_mask']:
-                batched_inputs2[k] = torch.tensor(torch.cat([vv[k] for vv in critic_prompt_inputs], dim=0), device=device)
-        concat_critic_ids = pad(concat_inputs, padding_value=self.processing_class.pad_token_id)
-        batched_inputs2['input_ids'] = concat_critic_ids
-        is_eos = concat_critic_ids == self.processing_class.eos_token_id
+        critic_prompt_completion_ids = torch.cat([prompt_inputs_critic['input_ids'], critic_completion_ids], dim=1)
+        # concat_inputs = []
+        # for i, c in enumerate(critic_prompt_inputs):
+        #     concat_inputs.append(torch.tensor(torch.cat([c['input_ids'], critic_completion_ids_unpad[i].unsqueeze(0)], dim=1).squeeze(0), device=device))
+        # batched_inputs2 = {}
+        # for k, v in batched_inputs.items():
+        #     if k not in ['input_ids', 'attention_mask']:
+        #         batched_inputs2[k] = torch.tensor(torch.cat([vv[k] for vv in critic_prompt_inputs], dim=0), device=device)
+        # concat_critic_ids = pad(concat_inputs, padding_value=self.processing_class.pad_token_id)
+        # batched_inputs2['input_ids'] = concat_critic_ids
+        is_eos = critic_completion_ids == self.processing_class.eos_token_id
         eos_idx = torch.full((is_eos.size(0),), is_eos.size(1), dtype=torch.long, device=device)
-        flipped_is_eos = torch.flip(is_eos.int(), dims=[1])
-        last_true_idx_flipped = flipped_is_eos.argmax(dim=1)
-        seq_len = is_eos.size(1)
-        last_true_idx = seq_len - 1 - last_true_idx_flipped
-        eos_idx[is_eos.any(dim=1)] = last_true_idx[is_eos.any(dim=1)]
-        sequence_indices = torch.arange(seq_len, device=device).expand(is_eos.size(0), -1)
-        batched_inputs2['attention_mask'] = (sequence_indices <= eos_idx.unsqueeze(1)).int()
+        eos_idx[is_eos.any(dim=1)] = is_eos.int().argmax(dim=1)[is_eos.any(dim=1)]
+        sequence_indices = torch.arange(is_eos.size(1), device=device).expand(is_eos.size(0), -1)
+        critic_completion_mask = (sequence_indices <= eos_idx.unsqueeze(1)).int()
+        critic_attention_mask = torch.cat([prompt_inputs_critic['attention_mask'], critic_completion_mask], dim=1)
+        batched_inputs2 = prompt_inputs_critic.copy()
+        batched_inputs2['input_ids'] = critic_prompt_completion_ids
+        batched_inputs2['attention_mask'] = critic_attention_mask
         ### end batched input2
         critic_per_token_logps = get_per_token_logps(model, **batched_inputs2)
+
+        critic_prompt_length = prompt_inputs_critic['input_ids'].size(1)
+        critic_per_token_logps = critic_per_token_logps[:, critic_prompt_length - 1:]
+
+        ### compute critic model KL
+        with torch.inference_mode():
+            if self.ref_model is not None:
+                ref_critic_per_token_logps = get_per_token_logps(self.ref_model, **batched_inputs2)
+            else:
+                with self.accelerator.unwrap_model(model).disable_adapter():
+                    ref_critic_per_token_logps = get_per_token_logps(model, **batched_inputs2)
+        ref_critic_per_token_logps = ref_critic_per_token_logps[:, critic_prompt_length - 1:]
+        critic_per_token_kl = torch.exp(ref_critic_per_token_logps - critic_per_token_logps) - (ref_critic_per_token_logps - critic_per_token_logps) - 1
+
         ## End Critic
 
         ## Start Refine
@@ -700,7 +703,7 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
                 output_reward_func = reward_func(prompts=prompts, completions=completions, **reward_kwargs)
                 rewards_per_func[:, i] = torch.tensor(output_reward_func, dtype=torch.float32, device=device)
         rewards = rewards_per_func.sum(dim=1)  # Shape (B*G,)
-        advantages, mean_grouped_rewards, std_grouped_rewards = self._compute_advantages(rewards)
+        advantages, mean_grouped_rewards, std_grouped_rewards = self._compute_advantage(rewards)
 
         # Compute the critic reward
         critic_rewards_per_func = torch.zeros(len(prompts), len(self.critic_reward_funcs), device=device)
@@ -716,16 +719,19 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
             output_reward_func = reward_func(prompts=prompts, completions=completions, critic_completions=critic_completions, **reward_kwargs)
             critic_rewards_per_func[:, i] = torch.tensor(output_reward_func, dtype=torch.float32, device=device)
         critic_rewards = critic_rewards_per_func.sum(dim=1)
-        critic_advantages = (critic_rewards - mean_critic_grouped_rewards) / (std_critic_grouped_rewards + 1e-4)
-        critic_advantages, mean_critic_grouped_rewards, std_critic_grouped_rewards = self._compute_advantages(critic_rewards)
+        critic_advantages, mean_critic_grouped_rewards, std_critic_grouped_rewards = self._compute_advantage(critic_rewards)
         # x - x.detach() allows for preserving gradients from x
         per_token_loss = torch.exp(per_token_logps - per_token_logps.detach()) * advantages.unsqueeze(1)
+        critic_per_token_loss = torch.exp(critic_per_token_logps - critic_per_token_logps.detach()) * critic_advantages.unsqueeze(1)
         # per_token_loss = -(per_token_loss - self.beta * per_token_kl)
         per_token_loss = -per_token_loss
+        critic_per_token_loss = -critic_per_token_loss
         loss = ((per_token_loss * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
-
+        critic_loss = ((critic_per_token_loss * critic_completion_mask).sum(dim=-1) / critic_completion_mask.sum(dim=1)).mean()
+        loss += critic_loss
         # Log the metrics
         completion_length = self.accelerator.gather_for_metrics(completion_mask.sum(1)).float().mean().item()
+
         self._metrics["completion_length"].append(completion_length)
 
         reward_per_func = self.accelerator.gather_for_metrics(rewards_per_func).mean(0)
@@ -735,14 +741,28 @@ class Qwen2VLCriticGRPOTrainer(Trainer):
             else:
                 reward_func_name = reward_func.__name__
             self._metrics[f"rewards/{reward_func_name}"].append(reward_per_func[i].item())
+        critic_reward_per_func = self.accelerator.gather_for_metrics(critic_rewards_per_func).mean(0)
+        for i, reward_func in enumerate(self.critic_reward_funcs):
+            if isinstance(reward_func, PreTrainedModel):
+                reward_func_name = reward_func.config._name_or_path.split("/")[-1]
+            else:
+                reward_func_name = reward_func.__name__
+            self._metrics[f"rewards/{reward_func_name}"].append(critic_reward_per_func[i].item())
 
         self._metrics["reward"].append(self.accelerator.gather_for_metrics(rewards).mean().item())
 
         self._metrics["reward_std"].append(self.accelerator.gather_for_metrics(std_grouped_rewards).mean().item())
 
+        self._metrics["critic_reward"].append(self.accelerator.gather_for_metrics(critic_rewards).mean().item())
+
+        self._metrics["reward_std"].append(self.accelerator.gather_for_metrics(std_critic_grouped_rewards).mean().item())
+
         mean_kl = ((per_token_kl * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
         self._metrics["kl"].append(self.accelerator.gather_for_metrics(mean_kl).mean().item())
 
+        mean_critic_kl = ((critic_per_token_kl * critic_completion_mask).sum(dim=1) / critic_completion_mask.sum(dim=1)).mean()
+        self._metrics['critic_kl'].append(self.accelerator.gather_for_metrics(mean_critic_kl).mean().item())
+        import pdb; pdb.set_trace()
         return loss
 
     def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
